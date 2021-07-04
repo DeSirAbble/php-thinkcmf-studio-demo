@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>首页 {$site_info.site_name|default=''}</title>
+    <meta name="keywords" content="{$site_info.site_seo_keywords|default=''}" />
+    <meta name="description" content="{$site_info.site_seo_description|default=''}">
+    <include file="public@head" />
+    <link href="__TMPL__/public/assets/css/slippry/slippry.css" rel="stylesheet">
+</head>
+
+<body class="body-white">
+    <!-- 导航栏 -->
+    <include file="public@nav" />
+
+    <div id="app" class="container">
+
+        <div class="row form-group">
+            <div class="col-md-10 offset-md-2">
+                <table class="table">
+                    <tr colspan="2" style="background-color:#E6E6FA;">
+                        <th>工作室编号</th>
+                        <th>工作室名称</th>
+                        <th>工作室描述</th>
+                        <th>人数上限</th>
+                        <th>报名工作室人数</th>
+                        <th>加入工作室人数</th>
+                    </tr>
+                    <tr v-for="studio in studioList">
+                        <th>{{studio.studioId}}</th>
+                        <th>
+                            <a>
+                                {{studio.title}}
+                            </a>
+                        </th>
+                        <th>{{studio.description}}</th>
+                        <th>{{studio.maxNumber}}</th>
+                        <th>{{studio.applicationNumber}}</th>
+                        <th>{{studio.number}}</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- 尾部 -->
+        <include file="public@footer" />
+    </div>
+
+</body>
+
+<script type="text/javascript" src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var urlGetMyStudioList = "{:url('/studio/Teacher/GetMyStudio')}";
+
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                studioList: []
+            }
+        },
+        mounted: function () {
+            //获取用户创建的工作室
+            let vm = this;
+            axios
+                .get(urlGetMyStudioList)
+                .then(function (response) {
+                    vm.studioList = [];
+                    var jsonStr = JSON.parse(response.request.response);
+                    vm.studioList = jsonStr;
+                    vm.$forceUpdate();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        methods: {
+
+        }
+    });
+
+</script>
+
+</html>

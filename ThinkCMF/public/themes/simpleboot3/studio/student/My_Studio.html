@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>首页 {$site_info.site_name|default=''}</title>
+    <meta name="keywords" content="{$site_info.site_seo_keywords|default=''}" />
+    <meta name="description" content="{$site_info.site_seo_description|default=''}">
+    <include file="public@head" />
+    <link href="__TMPL__/public/assets/css/slippry/slippry.css" rel="stylesheet">
+</head>
+
+<body class="body-white">
+    <!-- 导航栏 -->
+    <include file="public@nav" />
+
+    <div id="app" class="container">
+
+        <div class="row form-group">
+            <div class="col-md-10 offset-md-2">
+                <table class="table">
+                    <tr colspan="2" style="background-color:#E6E6FA;">
+                        <th>工作室编号</th>
+                        <th>创建者</th>
+                        <th>工作室名称</th>
+                        <th>工作室描述</th>
+                        <th>人数上限</th>
+                        <th>报名工作室人数</th>
+                        <th>加入工作室人数</th>
+                        <th>申请</th>
+                    </tr>
+                    <tr>
+                        <th>{{studio.studioId}}</th>
+                        <th>{{studio.username}}</th>
+                        <th>{{studio.title}}</th>
+                        <th>{{studio.description}}</th>
+                        <th>{{studio.maxNumber}}</th>
+                        <th>{{studio.applicationNumber}}</th>
+                        <th>{{studio.number}}</th>
+                        <th>
+                            <button class="btn" @click="applicaitonExit(studio.studioId,reason)">申请退出</button>
+                        </th>
+                    </tr>
+                </table>
+                <input type="text" v-model="reason">
+            </div>
+        </div>
+        <!-- 尾部 -->
+        <include file="public@footer" />
+    </div>
+
+</body>
+
+<script type="text/javascript" src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var urlGetMyStudio = "{:url('/studio/Student/GetMyStudio')}";
+    var urlDoExitStudio = "{:url('/studio/Student/DoExitStudio')}";
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                studio: null
+            }
+        },
+        mounted: function () {
+            //获取加入的工作室
+            let vm = this;
+            axios
+                .get(urlGetMyStudio)
+                .then(function (response) {
+                    vm.studio = [];
+                    var jsonStr = JSON.parse(response.request.response);
+                    vm.studio = jsonStr;
+                    vm.$forceUpdate();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        methods: {
+            applicaitonExit: function (studioId,reason) {
+                let vm = this;
+                axios
+                    .post(urlDoExitStudio, {
+                        params: {
+                            studioId: studioId,
+                            reason: reason
+                        }
+                    })
+                    .then(function (response) {
+                        var jsonStr = JSON.parse(response.request.response);
+                        alert(jsonStr);
+                        vm.$forceUpdate();
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+
+</script>
+
+</html>

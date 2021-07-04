@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Studio Create {$site_info.site_name|default=''}</title>
+    <meta name="keywords" content="{$site_info.site_seo_keywords|default=''}" />
+    <meta name="description" content="{$site_info.site_seo_description|default=''}">
+    <include file="public@head" />
+    <link href="__TMPL__/public/assets/css/slippry/slippry.css" rel="stylesheet">
+</head>
+
+<body class="body-white">
+    <!-- 导航栏 -->
+    <include file="public@nav" />
+
+    <div class="container">
+        <div class="row">
+            <div class="panel panel-default">
+                <!-- 面板标题 -->
+                <div class="panel panel-heading">
+                    创建工作室
+                </div>
+                <!-- 面板内容 -->
+                <div class="panel-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="title" class="col-sm-2 control-label">名称</label>
+                            <div class="col-sm-10">
+                                <input id="studio_title" type="text" class="form-control" name="title"
+                                    placeholder="请输入名称" />
+                                <span id="studio_title_alert_message" style="color: red;"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description" class="col-sm-2 control-label">简介</label>
+                            <div class="col-sm-10">
+                                <textarea id="studio_description" class="form-control" rows="3" name="description">
+
+                                </textarea>
+                                <span id="studio_description_alert_message" style="color: red;"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button id="btn_create_studio" type="submit" class="btn btn-default">创建</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- 尾部 -->
+        <include file="public@footer" />
+    </div>
+</body>
+<script type="text/javascript" src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //先获取元素
+        var studio_title = $("#studio_title");
+        var studio_title_alert_message = $("#studio_title_alert_message");
+        var studio_description = $("#studio_description");
+        var studio_description_alert_message = $("#studio_description_alert_message");
+        var btn_create_studio = $("#btn_create_studio");
+
+        var isCanSubmit = true;
+
+        //标题输入框失去焦点事件
+        studio_title.on("blur", function (event) {
+
+            $.ajax({
+                url: "{:url('/studio/teacher/DoCheckStudioTitle')}",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ title: studio_title.val() }),
+                dataType: "application/json",
+                complete: function (result) {
+                    var jsonStr = JSON.parse(result.responseText);
+
+                    if ("ok" == jsonStr) {
+                        studio_title_alert_message.text("");
+                        isCanSubmit = true;
+                    }
+                    else {
+                        studio_title_alert_message.text(jsonStr);
+                        isCanSubmit = false;
+                    }
+                }
+            });
+        });
+
+        btn_create_studio.on("click", function (event) {
+            //禁用自带的方法
+            event.preventDefault();
+
+            if (false == isCanSubmit) {
+                alert("不允许提交");
+                return;
+            }
+
+            $.ajax({
+                url: "{:url('/studio/teacher/DoCreate')}",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ title: studio_title.val(), description: studio_description.val() }),
+                dataType: "application/json",
+                complete: function (result) {
+                    var jsonStr = JSON.parse(result.responseText);
+
+                    if ("ok" == jsonStr) {
+                        alert("创建成功");
+                        isCanSubmit = false;
+                    }
+                    else {
+                        alert("创建失败");
+                        isCanSubmit = true;
+                    }
+                }
+            });
+
+        });
+
+    });
+</script>
+
+</html>

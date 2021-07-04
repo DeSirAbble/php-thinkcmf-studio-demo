@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>首页 {$site_info.site_name|default=''}</title>
+    <meta name="keywords" content="{$site_info.site_seo_keywords|default=''}" />
+    <meta name="description" content="{$site_info.site_seo_description|default=''}">
+    <include file="public@head" />
+    <link href="__TMPL__/public/assets/css/slippry/slippry.css" rel="stylesheet">
+</head>
+
+<body class="body-white">
+    <!-- 导航栏 -->
+    <include file="public@nav" />
+
+    <div id="app" class="container">
+
+        <div class="row form-group" style="text-align:center">
+            <div class="col-md-10 offset-md-2">
+                <table class="table">
+                    <tr colspan="2" style="background-color:#E6E6FA;">
+                        <th>工作室编号</th>
+                        <th>创建者</th>
+                        <th>工作室名称</th>
+                        <th>工作室描述</th>
+                        <th>人数上限</th>
+                        <th>报名工作室人数</th>
+                        <th>加入工作室人数</th>
+                        <th>申请</th>
+                    </tr>
+                    <tr v-for="studio in studioList">
+                        <th>{{studio.studioId}}</th>
+                        <th>{{studio.username}}</th>
+                        <th>{{studio.title}}</th>
+                        <th>{{studio.description}}</th>
+                        <th>{{studio.maxNumber}}</th>
+                        <th>{{studio.applicationNumber}}</th>
+                        <th>{{studio.number}}</th>
+                        <th>
+                            <button class="btn" @click="applicaitonJoin(studio.studioId,reason)">申请加入</button>
+                        </th>
+                    </tr>
+                </table>
+                <label>你的申请理由是: </label>
+                <input type="text" v-model="reason" ></div>
+            </div>
+        </div>
+        <!-- 尾部 -->
+        <include file="public@footer" />
+    </div>
+
+</body>
+
+<script type="text/javascript" src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var urlGetAllStudio = "{:url('/studio/Student/GetAllStudio')}";
+    var urlDoJoinStudio = "{:url('/studio/Student/DoJoinStudio')}";
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                studioList: []
+            }
+        },
+        mounted: function () {
+            //获取全部工作室
+            let vm = this;
+            axios
+                .get(urlGetAllStudio)
+                .then(function (response) {
+                    vm.studioList = [];
+                    var jsonStr = JSON.parse(response.request.response);
+                    vm.studioList = jsonStr;
+                    vm.$forceUpdate();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        methods: {
+            applicaitonJoin: function (studioId, reason) {
+                let vm = this;
+                axios
+                    .post(urlDoJoinStudio, {
+                        params: {
+                            studioId: studioId,
+                            reason: reason
+                        }
+                    })
+                    .then(function (response) {
+                        var jsonStr = JSON.parse(response.request.response);
+                        alert(jsonStr);
+
+                        axios
+                            .get(urlGetAllStudio)
+                            .then(function (response) {
+                                vm.studioList = [];
+                                var jsonStr = JSON.parse(response.request.response);
+                                vm.studioList = jsonStr;
+                                vm.$forceUpdate();
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+
+</script>
+
+</html>

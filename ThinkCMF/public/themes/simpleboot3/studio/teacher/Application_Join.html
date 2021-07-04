@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>首页 {$site_info.site_name|default=''}</title>
+    <meta name="keywords" content="{$site_info.site_seo_keywords|default=''}" />
+    <meta name="description" content="{$site_info.site_seo_description|default=''}">
+    <include file="public@head" />
+    <link href="__TMPL__/public/assets/css/slippry/slippry.css" rel="stylesheet">
+</head>
+
+<body class="body-white">
+    <!-- 导航栏 -->
+    <include file="public@nav" />
+
+    <div id="app" class="container">
+
+        <div class="row form-group">
+            <div class="col-md-10 offset-md-2">
+                <table class="table">
+                    <tr colspan="2" style="background-color:#E6E6FA;">
+                        <th>工作室编号</th>
+                        <th>工作室管理人员</th>
+                        <th>用户权限</th>
+                        <th>说明</th>
+                        <th>同意</th>
+                        <th>不同意</th>
+                    </tr>
+                    <tr v-for="item in data">
+                        <th>{{item.title}}</th>
+                        <th>{{item.username}}</th>
+                        <th>{{item.userType}}</th>
+                        <th>{{item.reason}}</th>
+                        <th>
+                            <button class="btn" @click="doApplicationJoin(item.studioId,item.userId,true)">同意</button>
+                        </th>
+                        <th>
+                            <button class="btn" @click="doApplicationJoin(item.studioId,item.userId,false)">不同意</button>
+                        </th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- 尾部 -->
+        <include file="public@footer" />
+    </div>
+
+</body>
+
+<script type="text/javascript" src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var urlGetApplicationJoin = "{:url('/studio/Teacher/GetApplicationJoin')}";
+    var urlDoApplicationJoin = "{:url('/studio/Teacher/DoApplicationJoin')}";
+
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                data: []
+            }
+        },
+        mounted: function () {
+            let vm = this;
+            axios
+                .get(urlGetApplicationJoin)
+                .then(function (response) {
+                    var jsonStr = JSON.parse(response.request.response);
+                    vm.data = jsonStr;
+                    vm.$forceUpdate();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        methods: {
+            doApplicationJoin: function (studioId, userId, result) {
+                //处理申请
+                let vm = this;
+                axios
+                    .post(urlDoApplicationJoin, {
+                        params: {
+                            studioId: studioId,
+                            userId: userId,
+                            result: result
+                        }
+                    })
+                    .then(function (response) {
+                        var jsonStr = JSON.parse(response.request.response);
+                        alert(jsonStr);
+                        //刷新页面
+                        axios
+                            .get(urlGetApplicationJoin)
+                            .then(function (response) {
+                                var jsonStr2 = JSON.parse(response.request.response);
+                                vm.data = jsonStr2;
+                                vm.$forceUpdate();
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+        }
+    });
+
+</script>
+
+</html>
